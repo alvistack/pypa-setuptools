@@ -1,0 +1,7 @@
+*.substvars
+*debhelper*
+.debhelper
+files
+python3-setuptools
+python3-pkg-resources
+tmp
