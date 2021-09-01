@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+
+SHELL := /bin/bash
+
+override_dh_auto_install:
+	dh_auto_install
+	rm -rf debian/tmp/usr/lib/python*/*-packages/pkg_resources/tests
+	find debian/tmp/usr/lib/python*/*-packages -type f -name '*.pyc' -exec rm -rf {} \;
+	fdupes -s debian/tmp/usr/lib/python*/*-packages
+
+override_dh_auto_test:
+
+override_dh_auto_clean:
+
+%:
+	dh $@ --buildsystem=pybuild --with python3

@@ -1,0 +1,5 @@
+python-setuptools (100:58.5.3-1) UNRELEASED; urgency=medium
+
+  * https://github.com/pypa/setuptools/releases/tag/v58.5.3
+
+ -- Wong Hoi Sing Edison <hswong3i@gmail.com>  Fri, 05 Nov 2021 14:01:08 +0800
