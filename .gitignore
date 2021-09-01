@@ -5,13 +5,10 @@ dist
 docs/build
 include
 lib
-distribute.egg-info
-setuptools.egg-info
 .coverage
 .eggs
 .tox
 .venv
-*.egg
 *.py[cod]
 *.swp
 *~
@@ -20,3 +17,4 @@ setuptools.egg-info
 .idea/
 .pytest_cache/
 .mypy_cache/
+.pybuild/
