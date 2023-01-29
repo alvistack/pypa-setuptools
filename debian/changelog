@@ -1,0 +1,5 @@
+python-setuptools (100:67.0.0-1) UNRELEASED; urgency=medium
+
+  * https://github.com/pypa/setuptools/releases/tag/v67.0.0
+
+ -- Wong Hoi Sing Edison <hswong3i@pantarei-design.com>  Sun, 29 Jan 2023 17:05:37 +0800
