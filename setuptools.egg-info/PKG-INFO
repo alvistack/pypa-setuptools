@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: setuptools
-Version: 68.2.3.dev1+gcb4f43ca6.d20240206
+Version: 68.2.3.dev1+g5a813694d.d20240206
 Summary: Easily download, build, install, upgrade, and uninstall Python packages
 Home-page: https://github.com/pypa/setuptools
 Author: Python Packaging Authority
