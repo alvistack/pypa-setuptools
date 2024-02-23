@@ -1,0 +1,5 @@
+python3-setuptools: copyright-without-copyright-notice
+python3-setuptools: initial-upload-closes-no-bugs
+python3-setuptools: national-encoding
+python3-setuptools: no-manual-page
+python3-setuptools: zero-byte-file-in-doc-directory

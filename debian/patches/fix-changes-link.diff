@@ -1,0 +1,11 @@
+--- a/docs/history.rst
++++ b/docs/history.rst
+@@ -7,7 +7,7 @@ History
+ 
+ .. towncrier-draft-entries:: DRAFT, unreleased as on |today|
+ 
+-.. include:: ../CHANGES (links).rst
++.. include:: ../CHANGES.rst
+ 
+ Credits
+ *******
