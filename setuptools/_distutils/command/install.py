@@ -60,6 +60,28 @@ INSTALL_SCHEMES = {
         'scripts': '{base}/Scripts',
         'data'   : '{base}',
         },
+    'unix_local': {
+        'stdlib': '{installed_base}/{platlibdir}/python{py_version_short}',
+        'platstdlib': '{platbase}/{platlibdir}/python{py_version_short}',
+        'purelib': '{base}/local/lib/python{py_version_short}/dist-packages',
+        'platlib': '{platbase}/local/{platlibdir}/python{py_version_short}/dist-packages',
+        'include': '{installed_base}/include/python{py_version_short}{abiflags}',
+        'headers': '{base}/local/include/python{py_version_short}{abiflags}',
+        'platinclude': '{installed_platbase}/include/python{py_version_short}{abiflags}',
+        'scripts': '{base}/local/bin',
+        'data': '{base}/local',
+        },
+    'deb_system': {
+        'stdlib': '{installed_base}/{platlibdir}/python{py_version_short}',
+        'platstdlib': '{platbase}/{platlibdir}/python{py_version_short}',
+        'purelib': '{base}/lib/python3/dist-packages',
+        'platlib': '{platbase}/{platlibdir}/python3/dist-packages',
+        'include': '{installed_base}/include/python{py_version_short}{abiflags}',
+        'headers': '{installed_base}/include/python{py_version_short}{abiflags}',
+        'platinclude': '{installed_platbase}/include/python{py_version_short}{abiflags}',
+        'scripts': '{base}/bin',
+        'data': '{base}',
+        },
     }
 
 # user site schemes
