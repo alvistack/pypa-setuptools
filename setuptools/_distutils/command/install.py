@@ -2,22 +2,25 @@
 
 Implements the Distutils 'install' command."""
 
-import contextlib
-import itertools
-import os
 import sys
+import os
+import contextlib
 import sysconfig
-from distutils._log import log
-from site import USER_BASE, USER_SITE
+import itertools
 
-from .. import _collections
+from distutils._log import log
 from ..core import Command
 from ..debug import DEBUG
-from ..errors import DistutilsOptionError, DistutilsPlatformError
-from ..file_util import write_file
 from ..sysconfig import get_config_vars
-from ..util import change_root, convert_path, get_platform, subst_vars
+from ..file_util import write_file
+from ..util import convert_path, subst_vars, change_root
+from ..util import get_platform
+from ..errors import DistutilsOptionError, DistutilsPlatformError
 from . import _framework_compat as fw
+from .. import _collections
+
+from site import USER_BASE
+from site import USER_SITE
 
 HAS_USER_SITE = True
 
@@ -61,6 +64,44 @@ INSTALL_SCHEMES = {
         'scripts': '{base}/Scripts',
         'data': '{base}',
     },
+    'unix_local': {
+        'stdlib': '{installed_base}/{platlibdir}/python{py_version_short}',
+        'platstdlib': '{platbase}/{platlibdir}/python{py_version_short}',
+        'purelib': '{base}/local/lib/python{py_version_short}/dist-packages',
+        'platlib':
+            '{platbase}/local/{platlibdir}/python{py_version_short}/dist-packages',
+        'include': '{installed_base}/include/python{py_version_short}{abiflags}',
+        'headers': '{base}/local/include/python{py_version_short}{abiflags}',
+        'platinclude':
+            '{installed_platbase}/include/python{py_version_short}{abiflags}',
+        'scripts': '{base}/local/bin',
+        'data': '{base}/local',
+        },
+    'deb_system': {
+        'stdlib': '{installed_base}/{platlibdir}/python{py_version_short}',
+        'platstdlib': '{platbase}/{platlibdir}/python{py_version_short}',
+        'purelib': '{base}/lib/python3/dist-packages',
+        'platlib': '{platbase}/{platlibdir}/python3/dist-packages',
+        'include': '{installed_base}/include/python{py_version_short}{abiflags}',
+        'headers': '{installed_base}/include/python{py_version_short}{abiflags}',
+        'platinclude':
+            '{installed_platbase}/include/python{py_version_short}{abiflags}',
+        'scripts': '{base}/bin',
+        'data': '{base}',
+        },
+    'posix_local': {
+        'stdlib': '{installed_base}/lib/python{py_version_short}',
+        'platstdlib': '{platbase}/lib/python{py_version_short}',
+        'purelib': '{base}/local/lib/python{py_version_short}/dist-packages',
+        'platlib': '{platbase}/local/lib/python{py_version_short}/dist-packages',
+        'include':
+            '{installed_base}/include/python{py_version_short}{abiflags}',
+        'headers': '{base}/local/include/python{py_version_short}{abiflags}',
+        'platinclude':
+            '{installed_platbase}/include/python{py_version_short}{abiflags}',
+        'scripts': '{base}/local/bin',
+        'data': '{base}/local',
+        },
 }
 
 # user site schemes
@@ -242,11 +283,9 @@ class install(Command):
     boolean_options = ['compile', 'force', 'skip-build']
 
     if HAS_USER_SITE:
-        user_options.append((
-            'user',
-            None,
-            "install in user site-package '%s'" % USER_SITE,
-        ))
+        user_options.append(
+            ('user', None, "install in user site-package '%s'" % USER_SITE)
+        )
         boolean_options.append('user')
 
     negative_opt = {'no-compile': 'compile'}
@@ -431,12 +470,9 @@ class install(Command):
             local_vars['userbase'] = self.install_userbase
             local_vars['usersite'] = self.install_usersite
 
-        self.config_vars = _collections.DictStack([
-            fw.vars(),
-            compat_vars,
-            sysconfig.get_config_vars(),
-            local_vars,
-        ])
+        self.config_vars = _collections.DictStack(
+            [fw.vars(), compat_vars, sysconfig.get_config_vars(), local_vars]
+        )
 
         self.expand_basedirs()
 
@@ -622,14 +658,16 @@ class install(Command):
 
     def expand_dirs(self):
         """Calls `os.path.expanduser` on install dirs."""
-        self._expand_attrs([
-            'install_purelib',
-            'install_platlib',
-            'install_lib',
-            'install_headers',
-            'install_scripts',
-            'install_data',
-        ])
+        self._expand_attrs(
+            [
+                'install_purelib',
+                'install_platlib',
+                'install_lib',
+                'install_headers',
+                'install_scripts',
+                'install_data',
+            ]
+        )
 
     def convert_paths(self, *names):
         """Call `convert_path` over `names`."""
@@ -683,7 +721,7 @@ class install(Command):
         if not self.user:
             return
         home = convert_path(os.path.expanduser("~"))
-        for _name, path in self.config_vars.items():
+        for name, path in self.config_vars.items():
             if str(path).startswith(home) and not os.path.isdir(path):
                 self.debug_print("os.makedirs('%s', 0o700)" % path)
                 os.makedirs(path, 0o700)
@@ -701,7 +739,7 @@ class install(Command):
             # internally, and not to sys.path, so we don't check the platform
             # matches what we are running.
             if self.warn_dir and build_plat != get_platform():
-                raise DistutilsPlatformError("Can't install when cross-compiling")
+                raise DistutilsPlatformError("Can't install when " "cross-compiling")
 
         # Run all sub-commands (at least those that need to be run)
         for cmd_name in self.get_sub_commands():
