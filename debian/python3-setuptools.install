@@ -1,0 +1,4 @@
+usr/lib/python*/*-packages/_distutils_hack
+usr/lib/python*/*-packages/_distutils_system_mod.py
+usr/lib/python*/*-packages/distutils-precedence.pth
+usr/lib/python*/*-packages/setuptools*
