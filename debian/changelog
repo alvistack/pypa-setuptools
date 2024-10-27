@@ -1,0 +1,5 @@
+python-setuptools (100:80.8.0-1) UNRELEASED; urgency=medium
+
+  * https://github.com/pypa/setuptools/releases/tag/v80.8.0
+
+ -- Wong Hoi Sing Edison <hswong3i@pantarei-design.com>  Tue, 20 May 2025 22:56:36 +0800
