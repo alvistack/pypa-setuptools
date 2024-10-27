@@ -1,0 +1,27 @@
+#!/usr/bin/make -f
+
+SHELL := /bin/bash
+
+%:
+	dh $@ --with python3 --buildsystem pybuild
+
+override_dh_auto_test:
+
+v_dir := usr/lib/$(shell py3versions -d)/dist-packages/setuptools/_vendor
+
+override_dh_auto_install:
+	dh_auto_install
+
+	mkdir -p debian/tmp/usr/share/python-wheels
+	python3 setup.py bdist_wheel \
+	        -d debian/tmp/usr/share/python-wheels
+
+	# dh_pypy from dh-python < 1.20150705-1 falls over requires.txt
+	# and our requires.txt aren't useful
+	find debian/tmp -name requires.txt -delete
+
+	find debian/tmp -name '*.exe' | xargs -r rm -f
+
+	fdupes -qnrps debian/tmp/usr/lib/python*/*-packages
+
+override_dh_auto_clean:
