@@ -1,0 +1,22 @@
+--- a/setuptools/command/easy_install.py
++++ b/setuptools/command/easy_install.py
+@@ -460,7 +460,7 @@ consider to install to another location,
+             for spec in self.args:
+                 self.easy_install(spec, not self.no_deps)
+             if self.record:
+-                outputs = self.outputs
++                outputs = list(sorted(self.outputs))
+                 if self.root:  # strip any package prefix
+                     root_len = len(self.root)
+                     for counter in range(len(outputs)):
+--- a/setuptools/_core_metadata.py
++++ b/setuptools/_core_metadata.py
+@@ -226,7 +226,7 @@ def _write_requirements(self, file):
+ 
+         if extra:
+             _write_provides_extra(file, processed_extras, extra, unsafe_extra)
+-        for req in _reqs.parse_strings(reqs):
++        for req in sorted(_reqs.parse_strings(reqs)):
+             r = _include_extra(req, extra, condition.strip())
+             file.write(f"Requires-Dist: {r}\n")
+ 
