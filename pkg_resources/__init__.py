@@ -87,7 +87,7 @@ import packaging.requirements
 import packaging.specifiers
 import packaging.utils
 import packaging.version
-from jaraco.text import drop_comment, join_continuation, yield_lines
+from setuptools._vendor.jaraco.text import drop_comment, join_continuation, yield_lines
 from platformdirs import user_cache_dir as _user_cache_dir
 
 if TYPE_CHECKING:
