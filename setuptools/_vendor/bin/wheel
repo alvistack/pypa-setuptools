@@ -1,4 +1,4 @@
-#!/Users/jaraco/code/pypa/setuptools/.tox/vendor/bin/python3
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import sys
 from wheel.cli import main
