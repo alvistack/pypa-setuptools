@@ -36,7 +36,7 @@ from glob import glob
 from sysconfig import get_path
 from typing import TYPE_CHECKING
 
-from jaraco.text import yield_lines
+from setuptools._vendor.jaraco.text import yield_lines
 
 import pkg_resources
 from pkg_resources import (

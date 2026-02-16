@@ -1,0 +1,73 @@
+
+[certs]
+
+[core]
+jaraco.text>=3.7
+more_itertools>=8.8
+packaging>=24
+platformdirs>=2.6.2
+wheel>=0.43.0
+
+[core:python_version < "3.10"]
+importlib_metadata>=6
+
+[core:python_version < "3.11"]
+tomli>=2.0.1
+
+[core:python_version < "3.9"]
+importlib_resources>=5.10.2
+
+[doc]
+furo
+jaraco.packaging>=9.3
+jaraco.tidelift>=1.4
+pygments-github-lexers==0.0.5
+pyproject-hooks!=1.1
+rst.linker>=1.9
+sphinx-favicon
+sphinx-inline-tabs
+sphinx-lint
+sphinx-notfound-page<2,>=1
+sphinx-reredirects
+sphinx>=3.5
+sphinxcontrib-towncrier
+towncrier<24.7
+
+[ssl]
+
+[test]
+build[virtualenv]>=1.0.3
+filelock>=3.4.0
+importlib_metadata
+ini2toml[lite]>=0.14
+jaraco.envs>=2.2
+jaraco.path>=3.2.0
+jaraco.test
+mypy==1.11.*
+packaging>=23.2
+pip>=19.1
+pyproject-hooks!=1.1
+pytest!=8.1.*,>=6
+pytest-checkdocs>=2.4
+pytest-cov
+pytest-enabler>=2.2
+pytest-home>=0.5
+pytest-mypy
+pytest-subprocess
+pytest-timeout
+pytest-xdist>=3
+tomli
+tomli-w>=1.0.0
+virtualenv>=13.0.0
+wheel>=0.44.0
+
+[test:platform_system == "Windows"]
+pytest-ruff<0.4
+
+[test:python_version >= "3.9" and sys_platform != "cygwin"]
+jaraco.develop>=7.21
+
+[test:sys_platform != "cygwin"]
+pytest-perf
+pytest-ruff>=0.2.1
+pytest-ruff>=0.3.2
