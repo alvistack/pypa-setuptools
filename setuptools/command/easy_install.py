@@ -194,6 +194,10 @@ class easy_install(Command):
         self.pth_file = self.always_copy_from = None
         self.site_dirs = None
         self.installed_projects = {}
+        # enable custom installation, known values: deb
+        self.install_layout = None
+        self.force_installation_into_system_dir = None
+
         # Always read easy_install options, even if we are subclassed, or have
         # an independent instance created.  This ensures that defaults will
         # always come from the standard configuration file(s)' "easy_install"
@@ -264,6 +268,11 @@ class easy_install(Command):
 
         self.expand_basedirs()
         self.expand_dirs()
+
+        if self.install_layout:
+            if not self.install_layout.lower() in ['deb']:
+                raise DistutilsOptionError("unknown value for --install-layout")
+            self.install_layout = self.install_layout.lower()
 
         self._expand(
             'install_dir', 'script_dir', 'build_directory',

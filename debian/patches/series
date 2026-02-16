@@ -1,0 +1,9 @@
+0001-python312.diff
+install-layout.diff
+multiarch-extname.diff
+no-SOURCES.txt-in-egg-ingo.diff
+reproducible.diff
+sorted-requires.diff
+PKG-INFO-output-reproducible.diff
+CVE-2022-40897.patch
+CVE-2024-6345.patch

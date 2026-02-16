@@ -1,0 +1,13 @@
+diff --git a/setuptools/command/easy_install.py b/setuptools/command/easy_install.py
+index a797824a9..98f83aa16 100644
+--- a/setuptools/command/easy_install.py
++++ b/setuptools/command/easy_install.py
+@@ -443,7 +443,7 @@ consider to install to another location, or use the option
+             for spec in self.args:
+                 self.easy_install(spec, not self.no_deps)
+             if self.record:
+-                outputs = self.outputs
++                outputs = list(sorted(self.outputs))
+                 if self.root:  # strip any package prefix
+                     root_len = len(self.root)
+                     for counter in range(len(outputs)):

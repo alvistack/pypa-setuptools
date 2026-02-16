@@ -1,0 +1,2 @@
+usr/lib/python*/*-packages/_distutils_hack
+usr/lib/python*/*-packages/setuptools*

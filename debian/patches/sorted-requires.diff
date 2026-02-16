@@ -1,0 +1,13 @@
+diff --git a/setuptools/command/egg_info.py b/setuptools/command/egg_info.py
+index f2210292e..37f59a2bb 100644
+--- a/setuptools/command/egg_info.py
++++ b/setuptools/command/egg_info.py
+@@ -675,7 +675,7 @@ def _write_requirements(stream, reqs):
+ 
+     def append_cr(line):
+         return line + '\n'
+-    lines = map(append_cr, lines)
++    lines = map(append_cr, sorted(lines))
+     stream.writelines(lines)
+ 
+ 
