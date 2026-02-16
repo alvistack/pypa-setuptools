@@ -19,7 +19,7 @@ import tempfile
 from collections.abc import Callable, Iterable, Mapping
 from typing import TYPE_CHECKING, AnyStr
 
-from jaraco.functools import pass_none
+from setuptools._vendor.jaraco.functools import pass_none
 
 from ._log import log
 from ._modified import newer
