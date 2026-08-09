@@ -1,0 +1,13 @@
+diff --git a/setuptools/_core_metadata.py b/setuptools/_core_metadata.py
+index a52d5cf75..eb3a93aab 100644
+--- a/setuptools/_core_metadata.py
++++ b/setuptools/_core_metadata.py
+@@ -235,7 +235,7 @@ def _write_requirements(self, file):
+ 
+         if extra:
+             _write_provides_extra(file, processed_extras, extra, unsafe_extra)
+-        for req in _reqs.parse_strings(reqs):
++        for req in sorted(_reqs.parse_strings(reqs)):
+             r = _include_extra(req, extra, condition.strip())
+             file.write(f"Requires-Dist: {r}\n")
+ 
