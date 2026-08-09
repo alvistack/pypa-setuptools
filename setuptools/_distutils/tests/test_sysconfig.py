@@ -14,7 +14,7 @@ from distutils.unixccompiler import UnixCCompiler
 import jaraco.envs
 import path
 import pytest
-from jaraco.text import trim
+from setuptools._vendor.jaraco.text import trim
 from test.support import swap_item
 
 

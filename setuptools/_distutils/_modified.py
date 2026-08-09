@@ -7,7 +7,7 @@ import os.path
 from collections.abc import Callable, Iterable
 from typing import Literal, TypeVar
 
-from jaraco.functools import splat
+from setuptools._vendor.jaraco.functools import splat
 
 from .errors import DistutilsFileError
 

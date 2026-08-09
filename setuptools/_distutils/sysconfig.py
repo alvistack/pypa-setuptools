@@ -19,7 +19,7 @@ import sys
 import sysconfig
 from typing import TYPE_CHECKING, Literal, overload
 
-from jaraco.functools import pass_none
+from setuptools._vendor.jaraco.functools import pass_none
 
 from .ccompiler import CCompiler
 from .errors import DistutilsPlatformError
