@@ -2,8 +2,8 @@ import functools
 import itertools
 import operator
 
-from jaraco.functools import pass_none
-from jaraco.text import yield_lines
+from setuptools._vendor.jaraco.functools import pass_none
+from setuptools._vendor.jaraco.text import yield_lines
 from more_itertools import consume
 
 from ._importlib import metadata
