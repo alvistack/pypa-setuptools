@@ -1,0 +1,5 @@
+python-setuptools source: file-without-copyright-information
+python-setuptools source: no-debian-changes
+python-setuptools source: source-contains-prebuilt-windows-binary
+python-setuptools source: source-is-missing
+python-setuptools source: source-package-encodes-python-version

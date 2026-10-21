@@ -15,7 +15,7 @@ from collections.abc import Mapping
 from itertools import filterfalse
 from typing import TypeVar
 
-from jaraco.text import yield_lines
+from setuptools._vendor.jaraco.text import yield_lines
 from packaging.requirements import Requirement
 
 from .. import _reqs

@@ -1,0 +1,323 @@
+diff --git a/_distutils_system_mod.py b/_distutils_system_mod.py
+new file mode 100644
+index 000000000..254e425ce
+--- /dev/null
++++ b/_distutils_system_mod.py
+@@ -0,0 +1,136 @@
++"""
++Apply Debian-specific patches to distutils commands and sysconfig.
++
++Extracts the customized behavior from patches as reported
++in pypa/distutils#2 and applies those customizations (except
++for scheme definitions) to those commands.
++
++Place this module somewhere in sys.path to take effect.
++"""
++
++import os
++import sys
++import sysconfig
++
++import distutils.sysconfig
++import distutils.command.install as orig_install
++import distutils.command.install_egg_info as orig_install_egg_info
++from distutils.command.install_egg_info import (
++    to_filename,
++    safe_name,
++    safe_version,
++    )
++from distutils.errors import DistutilsOptionError
++
++
++class install(orig_install.install):
++    user_options = list(orig_install.install.user_options) + [
++        ('install-layout=', None,
++         "installation layout to choose (known values: deb, unix)"),
++    ]
++
++    def initialize_options(self):
++        super().initialize_options()
++        self.prefix_option = None
++        self.install_layout = None
++
++    def finalize_unix(self):
++        self.prefix_option = self.prefix
++        super().finalize_unix()
++        if self.install_layout:
++            if self.install_layout.lower() in ['deb']:
++                self.select_scheme("deb_system")
++            elif self.install_layout.lower() in ['unix']:
++                self.select_scheme("posix_prefix")
++            else:
++                raise DistutilsOptionError(
++                    "unknown value for --install-layout")
++        elif ((self.prefix_option and
++               os.path.normpath(self.prefix) != '/usr/local')
++              or sys.base_prefix != sys.prefix
++              or 'PYTHONUSERBASE' in os.environ
++              or 'VIRTUAL_ENV' in os.environ
++              or 'real_prefix' in sys.__dict__):
++            self.select_scheme("posix_prefix")
++        else:
++            if os.path.normpath(self.prefix) == '/usr/local':
++                self.prefix = self.exec_prefix = '/usr'
++                self.install_base = self.install_platbase = '/usr'
++            self.select_scheme("posix_local")
++
++
++class install_egg_info(orig_install_egg_info.install_egg_info):
++    user_options = list(orig_install_egg_info.install_egg_info.user_options) + [
++        ('install-layout', None, "custom installation layout"),
++    ]
++
++    def initialize_options(self):
++        super().initialize_options()
++        self.prefix_option = None
++        self.install_layout = None
++
++    def finalize_options(self):
++        self.set_undefined_options('install',('install_layout','install_layout'))
++        self.set_undefined_options('install',('prefix_option','prefix_option'))
++        super().finalize_options()
++
++    @property
++    def basename(self):
++        if self.install_layout:
++            if not self.install_layout.lower() in ['deb', 'unix']:
++                raise DistutilsOptionError(
++                    "unknown value for --install-layout")
++            no_pyver = (self.install_layout.lower() == 'deb')
++        elif self.prefix_option:
++            no_pyver = False
++        else:
++            no_pyver = True
++        if no_pyver:
++            basename = "%s-%s.egg-info" % (
++                to_filename(safe_name(self.distribution.get_name())),
++                to_filename(safe_version(self.distribution.get_version()))
++                )
++        else:
++            basename = "%s-%s-py%d.%d.egg-info" % (
++                to_filename(safe_name(self.distribution.get_name())),
++                to_filename(safe_version(self.distribution.get_version())),
++                *sys.version_info[:2]
++            )
++        return basename
++
++
++def _posix_lib(standard_lib, libpython, early_prefix, prefix):
++    is_default_prefix = not early_prefix or os.path.normpath(early_prefix) in ('/usr', '/usr/local')
++    if standard_lib:
++        return libpython
++    elif (is_default_prefix and
++              'PYTHONUSERBASE' not in os.environ and
++              'VIRTUAL_ENV' not in os.environ and
++              'real_prefix' not in sys.__dict__ and
++              sys.prefix == sys.base_prefix):
++            return os.path.join(prefix, "lib", "python3", "dist-packages")
++    else:
++        return os.path.join(libpython, "site-packages")
++
++
++def extend_schemes():
++    sysconfig._INSTALL_SCHEMES.setdefault(
++        'deb_system',
++        dict(
++            purelib='{base}/lib/python3/dist-packages',
++            platlib='{platbase}/lib/python3/dist-packages',
++            headers='{base}/include/python{py_version_short}/{dist_name}',
++            scripts='{base}/bin',
++            data='{base}',
++        ),
++    )
++
++
++def apply_customizations():
++    orig_install.install = install
++    orig_install_egg_info.install_egg_info = install_egg_info
++    distutils.sysconfig._posix_lib = _posix_lib
++    extend_schemes()
++
++
++apply_customizations()
+diff --git a/setuptools/_distutils/command/install.py b/setuptools/_distutils/command/install.py
+index 2f47c9ef7..93fac1035 100644
+--- a/setuptools/_distutils/command/install.py
++++ b/setuptools/_distutils/command/install.py
+@@ -65,6 +65,44 @@ INSTALL_SCHEMES = {
+         'scripts': '{base}/Scripts',
+         'data': '{base}',
+     },
++    'unix_local': {
++        'stdlib': '{installed_base}/{platlibdir}/python{py_version_short}',
++        'platstdlib': '{platbase}/{platlibdir}/python{py_version_short}',
++        'purelib': '{base}/local/lib/python{py_version_short}/dist-packages',
++        'platlib':
++            '{platbase}/local/{platlibdir}/python{py_version_short}/dist-packages',
++        'include': '{installed_base}/include/python{py_version_short}{abiflags}',
++        'headers': '{base}/local/include/python{py_version_short}{abiflags}',
++        'platinclude':
++            '{installed_platbase}/include/python{py_version_short}{abiflags}',
++        'scripts': '{base}/local/bin',
++        'data': '{base}/local',
++        },
++    'deb_system': {
++        'stdlib': '{installed_base}/{platlibdir}/python{py_version_short}',
++        'platstdlib': '{platbase}/{platlibdir}/python{py_version_short}',
++        'purelib': '{base}/lib/python3/dist-packages',
++        'platlib': '{platbase}/{platlibdir}/python3/dist-packages',
++        'include': '{installed_base}/include/python{py_version_short}{abiflags}',
++        'headers': '{installed_base}/include/python{py_version_short}{abiflags}',
++        'platinclude':
++            '{installed_platbase}/include/python{py_version_short}{abiflags}',
++        'scripts': '{base}/bin',
++        'data': '{base}',
++        },
++    'posix_local': {
++        'stdlib': '{installed_base}/lib/python{py_version_short}',
++        'platstdlib': '{platbase}/lib/python{py_version_short}',
++        'purelib': '{base}/local/lib/python{py_version_short}/dist-packages',
++        'platlib': '{platbase}/local/lib/python{py_version_short}/dist-packages',
++        'include':
++            '{installed_base}/include/python{py_version_short}{abiflags}',
++        'headers': '{base}/local/include/python{py_version_short}{abiflags}',
++        'platinclude':
++            '{installed_platbase}/include/python{py_version_short}{abiflags}',
++        'scripts': '{base}/local/bin',
++        'data': '{base}/local',
++        },
+ }
+ 
+ # user site schemes
+diff --git a/setuptools/_distutils/sysconfig.py b/setuptools/_distutils/sysconfig.py
+index 2d56e3def..8abfde379 100644
+--- a/setuptools/_distutils/sysconfig.py
++++ b/setuptools/_distutils/sysconfig.py
+@@ -220,8 +220,15 @@ def _get_python_inc_nt(prefix, spec_prefix, plat_specific):
+ 
+ # allow this behavior to be monkey-patched. Ref pypa/distutils#2.
+ def _posix_lib(standard_lib, libpython, early_prefix, prefix):
++    is_default_prefix = not early_prefix or os.path.normpath(early_prefix) in ('/usr', '/usr/local')
+     if standard_lib:
+         return libpython
++    elif (is_default_prefix and
++              'PYTHONUSERBASE' not in os.environ and
++              'VIRTUAL_ENV' not in os.environ and
++              'real_prefix' not in sys.__dict__ and
++              sys.prefix == sys.base_prefix):
++            return os.path.join(prefix, "lib", "python3", "dist-packages")
+     else:
+         return os.path.join(libpython, "site-packages")
+ 
+diff --git a/setuptools/command/install.py b/setuptools/command/install.py
+index c1e4fa38e..caf61854b 100644
+--- a/setuptools/command/install.py
++++ b/setuptools/command/install.py
+@@ -1,5 +1,8 @@
+ from __future__ import annotations
+ 
++import os
++import sys
++
+ import inspect
+ import platform
+ from collections.abc import Callable
+@@ -41,6 +44,11 @@ class install(orig.install):
+             None,
+             "used by system package builders to create 'flat' eggs",
+         ),
++        (
++            'install-layout=',
++            None,
++            "installation layout to choose (known values: deb, unix)",
++        ),
+     ]
+     boolean_options = orig.install.boolean_options + [
+         'old-and-unmanageable',
+@@ -69,6 +77,8 @@ class install(orig.install):
+         super().initialize_options()
+         self.old_and_unmanageable = None
+         self.single_version_externally_managed = None
++        self.install_layout = None
++        self.prefix_option = None
+ 
+     def finalize_options(self) -> None:
+         super().finalize_options()
+@@ -81,6 +91,30 @@ class install(orig.install):
+                 "You must specify --record or --root when building system packages"
+             )
+ 
++    def finalize_unix(self):
++        self.prefix_option = self.prefix
++        super().finalize_unix()
++        if self.install_layout:
++            if self.install_layout.lower() in ['deb']:
++                self.select_scheme("deb_system")
++            elif self.install_layout.lower() in ['unix']:
++                self.select_scheme("posix_prefix")
++            else:
++                raise DistutilsOptionError(
++                    "unknown value for --install-layout")
++        elif ((self.prefix_option and
++               os.path.normpath(self.prefix) != '/usr/local')
++              or sys.base_prefix != sys.prefix
++              or 'PYTHONUSERBASE' in os.environ
++              or 'VIRTUAL_ENV' in os.environ
++              or 'real_prefix' in sys.__dict__):
++            self.select_scheme("posix_prefix")
++        else:
++            if os.path.normpath(self.prefix) == '/usr/local':
++                self.prefix = self.exec_prefix = '/usr'
++                self.install_base = self.install_platbase = '/usr'
++            self.select_scheme("posix_local")
++
+     def handle_extra_path(self):
+         if self.root or self.single_version_externally_managed:
+             # explicit backward-compatibility mode, allow extra_path to work
+diff --git a/setuptools/command/install_egg_info.py b/setuptools/command/install_egg_info.py
+index 65e2ab3a2..eb4459666 100644
+--- a/setuptools/command/install_egg_info.py
++++ b/setuptools/command/install_egg_info.py
+@@ -1,4 +1,5 @@
+ import os
++import sys
+ from typing import ClassVar
+ 
+ from setuptools import Command, namespaces
+@@ -7,6 +8,7 @@ from setuptools.archive_util import unpack_archive
+ from .._path import ensure_directory
+ 
+ from distutils import dir_util, log
++from distutils.errors import DistutilsOptionError
+ 
+ 
+ class install_egg_info(namespaces.Installer, Command):
+@@ -22,11 +24,28 @@ class install_egg_info(namespaces.Installer, Command):
+ 
+     def initialize_options(self):
+         self.install_dir = None
++        self.install_layout = None
++        self.prefix_option = None
+ 
+     def finalize_options(self) -> None:
+         self.set_undefined_options('install_lib', ('install_dir', 'install_dir'))
++        self.set_undefined_options('install', ('install_layout', 'install_layout'))
++        if sys.hexversion > 0x2060000:
++            self.set_undefined_options('install', ('prefix_option', 'prefix_option'))
+         ei_cmd = self.get_finalized_command("egg_info")
+         basename = f"{ei_cmd._get_egg_basename()}.egg-info"
++
++        if self.install_layout:
++            if not self.install_layout.lower() in ['deb']:
++                raise DistutilsOptionError("unknown value for --install-layout")
++            self.install_layout = self.install_layout.lower()
++            basename = basename.replace('-py%s' % sys.version[:4], '')
++        elif self.prefix_option or 'real_prefix' in sys.__dict__:
++            # don't modify for virtualenv
++            pass
++        else:
++            basename = basename.replace('-py%s' % sys.version[:4], '')
++
+         self.source = ei_cmd.egg_info
+         self.target = os.path.join(self.install_dir, basename)
+         self.outputs: list[str] = []
